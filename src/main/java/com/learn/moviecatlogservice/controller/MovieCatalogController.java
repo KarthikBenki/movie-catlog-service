@@ -38,12 +38,17 @@ public class MovieCatalogController {
         // Use WebClient for reactive calls to retrieve movie details
         return ratings.stream()
                 .map(rating -> {
+
+                    Movie movie = restTemplate.getForObject(movie_info_uri + rating.getMovieId(), Movie.class);
+                    /*
                     Movie movie = webClientBuilder.build()
                             .get()  // Specifies a GET request
                             .uri(movie_info_uri + rating.getMovieId())  // Constructs the URI with movie ID
                             .retrieve()
                             .bodyToMono(Movie.class)  // Convert response body to a Mono containing Movie object
                             .block();  // Blocks until the Mono emits a value (might not be suitable for production)
+
+                     */
 
                     // Create a CatalogItem with retrieved movie information and rating
                     return new CatalogItem(movie.getName(), "It is a kannada Movie", rating.getRating());
