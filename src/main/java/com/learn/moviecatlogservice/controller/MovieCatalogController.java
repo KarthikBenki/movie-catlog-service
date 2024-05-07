@@ -2,7 +2,7 @@ package com.learn.moviecatlogservice.controller;
 
 import com.learn.moviecatlogservice.model.CatalogItem;
 import com.learn.moviecatlogservice.model.Movie;
-import com.learn.moviecatlogservice.model.Rating;
+import com.learn.movieratingservice.model.UserRating;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,18 +29,29 @@ public class MovieCatalogController {
     @Value("${movie.info.uri}")  // Injected value from properties file for movie info URI
     private String movie_info_uri;
 
+    @Value("${movie.rating.uri}")
+    private String movie_rating_uri;
+
     @GetMapping("/{userId}")  // Maps GET requests to "/catalog/{userId}"
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId) {
 
         // Hardcoded list of ratings for demonstration purposes (replace with actual logic)
-        List<Rating> ratings = Arrays.asList(new Rating("1234", 5), new Rating("5678", 2));
+//        List<Rating> ratings = Arrays.asList(new Rating("1234", 5), new Rating("5678", 2));
+        UserRating userRating = restTemplate.getForObject(movie_rating_uri+"/users/"+userId, UserRating.class);
 
         // Use WebClient for reactive calls to retrieve movie details
-        return ratings.stream()
+        return userRating.getRatings().stream()
                 .map(rating -> {
-
                     Movie movie = restTemplate.getForObject(movie_info_uri + rating.getMovieId(), Movie.class);
-                    /*
+                    // Create a CatalogItem with retrieved movie information and rating
+                    return new CatalogItem(movie.getName(), "It is a kannada Movie", rating.getRating());
+                })
+                .collect(Collectors.toList());
+    }
+}
+
+
+/*
                     Movie movie = webClientBuilder.build()
                             .get()  // Specifies a GET request
                             .uri(movie_info_uri + rating.getMovieId())  // Constructs the URI with movie ID
@@ -49,10 +60,3 @@ public class MovieCatalogController {
                             .block();  // Blocks until the Mono emits a value (might not be suitable for production)
 
                      */
-
-                    // Create a CatalogItem with retrieved movie information and rating
-                    return new CatalogItem(movie.getName(), "It is a kannada Movie", rating.getRating());
-                })
-                .collect(Collectors.toList());
-    }
-}
