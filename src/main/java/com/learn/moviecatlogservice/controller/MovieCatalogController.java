@@ -4,6 +4,7 @@ import com.learn.moviecatlogservice.model.CatalogItem;
 import com.learn.moviecatlogservice.model.Movie;
 import com.learn.moviecatlogservice.model.Rating;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,9 @@ public class MovieCatalogController {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Value("${movie.info.uri}")
+    private String movie_info_uri;
+
     @GetMapping("/{userId}")
     public List<CatalogItem> getCatalog(@PathVariable("userId")  String userId) {
         List<Rating> ratings = Arrays.asList(new Rating("1234",5),
@@ -30,7 +34,7 @@ public class MovieCatalogController {
         return ratings
                 .stream()
                 .map(rating -> {
-                    Movie movie = restTemplate.getForObject("http://localhost:8082/movies/"+rating.getMovieId(), Movie.class);
+                    Movie movie = restTemplate.getForObject(movie_info_uri+rating.getMovieId(), Movie.class);
                  return    new CatalogItem(movie.getName(), "It is a kannada Movie", rating.getRating());
                 })
                 .collect(Collectors.toList());
